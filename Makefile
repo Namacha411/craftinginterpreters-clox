@@ -4,11 +4,11 @@ CFLAGS = -fanalyzer -Wall -Wextra -g -Og
 
 # 対象ファイル
 TARGET = main
-SRCS = main.c chunk.c common.c memory.c debug.c value.c
+SRCS = main.c chunk.c common.c memory.c debug.c value.c vm.c
 OBJS = $(SRCS:.c=.o)
 
 # 依存関係
-DEPS = chunk.h common.h memory.h debug.h value.h
+DEPS = chunk.h common.h memory.h debug.h value.h vm.h
 
 # 実行ファイルの生成ルール
 $(TARGET): $(OBJS)

@@ -4,13 +4,21 @@
 #include "value.h"
 #include <stdint.h>
 
-typedef enum { OP_CONSTNAT, OP_RETURN } OpCode;
+typedef enum {
+  OP_CONSTNAT,
+  OP_ADD,
+  OP_SUBTRACT,
+  OP_MULTIPLY,
+  OP_DIVIDE,
+  OP_NEGATE,
+  OP_RETURN,
+} OpCode;
 
 typedef struct {
   int count;
   int capacity;
   uint8_t *code;
-  int* lines;
+  int *lines;
   ValueArray constants;
 } Chunk;
 
