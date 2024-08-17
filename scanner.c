@@ -109,7 +109,7 @@ static TokenType checkKeyword(int start, int length, const char *rest,
   return TOKEN_IDENTIFIER;
 }
 
-static bool isDigit(char c) { return c <= '0' && c <= '9'; }
+static bool isDigit(char c) { return '0' <= c && c <= '9'; }
 
 static Token number() {
   while (isDigit(peek())) {
