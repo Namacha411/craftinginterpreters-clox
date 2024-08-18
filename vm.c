@@ -1,10 +1,14 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #include "chunk.h"
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "memory.h"
+#include "object.h"
 #include "value.h"
 #include "vm.h"
 
@@ -24,9 +28,14 @@ static void runtimeError(const char *format, ...) {
   resetStack();
 }
 
-void initVM() { resetStack(); }
+void initVM() {
+  resetStack();
+  vm.objects = NULL;
+}
 
-void freeVM() {}
+void freeVM() {
+  freeObjects();
+}
 
 void push(Value value) {
   *vm.stackTop = value;
@@ -42,6 +51,21 @@ static Value peek(int distance) { return vm.stackTop[-1 - distance]; }
 
 static bool isFalsey(Value value) {
   return isNil(value) || (isBool(value) && !asBool(value));
+}
+
+static void concatenate() {
+#define IGNORE_RETURN(expr)                                                    \
+  if (expr) {                                                                  \
+  }
+  ObjString *b = asString(pop());
+  ObjString *a = asString(pop());
+  int length = a->length + b->length;
+  char *chars = ALLOCATE(char, length + 1);
+  IGNORE_RETURN(memcpy(chars, a->chars, a->length));
+  IGNORE_RETURN(memcpy(chars + a->length, b->chars, b->length));
+  ObjString *result = takeString(chars, length);
+  push(objVal((Obj *)result));
+#undef IGNORE_RETURN
 }
 
 static InterpretResult run() {
@@ -91,11 +115,24 @@ static InterpretResult run() {
       push(boolVal(valuesEqual(a, b)));
       break;
     }
-    case OP_GREATER: BINARY_OP(boolVal, >); break;
-    case OP_LESS: BINARY_OP(boolVal, <); break;
-    case OP_ADD:
-      BINARY_OP(numberVal, +);
+    case OP_GREATER:
+      BINARY_OP(boolVal, >);
       break;
+    case OP_LESS:
+      BINARY_OP(boolVal, <);
+      break;
+    case OP_ADD: {
+      if (isString(peek(0)) && isString(peek(1))) {
+        concatenate();
+      } else if (isNumber(peek(0)) && isNumber(peek(1))) {
+        double b = asNumber(pop());
+        double a = asNumber(pop());
+        push(numberVal(a + b));
+      } else {
+        runtimeError("Operands must be two numbers or two strings.");
+      }
+      break;
+    }
     case OP_SUBTRACT:
       BINARY_OP(numberVal, -);
       break;

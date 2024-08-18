@@ -4,10 +4,14 @@
 
 #include <stdint.h>
 
+typedef struct Obj Obj;
+typedef struct ObjString ObjString;
+
 typedef enum {
   VAL_BOOL,
   VAL_NIL,
   VAL_NUMBER,
+  VAL_OBJ,
 } ValueType;
 
 typedef struct {
@@ -15,6 +19,7 @@ typedef struct {
   union {
     bool boolean;
     double number;
+    Obj *obj;
   } as;
 } Value;
 
@@ -29,13 +34,16 @@ bool valuesEqual(Value a, Value b);
 Value boolVal(bool value);
 Value nilVal();
 Value numberVal(double value);
+Value objVal(Obj *value);
 
 bool asBool(Value value);
 double asNumber(Value value);
+Obj* asObj(Value value);
 
 bool isBool(Value value);
 bool isNil(Value value);
 bool isNumber(Value value);
+bool isObj(Value value);
 
 void initValueArray(ValueArray *array);
 
